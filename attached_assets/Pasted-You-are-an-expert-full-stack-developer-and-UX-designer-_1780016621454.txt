@@ -1,0 +1,86 @@
+You are an expert full-stack developer and UX designer. I want you to generate a **professional, full-featured digital literary platform** called "The Sura Codex" using **Next.js + TypeScript**. 
+
+The platform must include the following features:
+
+1. **Authentication & Roles**:
+   - Full login/register system for Admin and Visitors.
+   - Role-based access: Admin can create/edit/delete articles and novels.
+   - Visitors can read, like, share, comment on content.
+
+2. **Content Management**:
+   - Admin can upload new content: Articles or Novels with:
+     - Title
+     - Excerpt
+     - Markdown content
+     - Cover Image
+   - Articles and Novels support:
+     - Like button
+     - Share/Reshare button
+     - Comment section with threaded replies
+   - Admin can moderate comments.
+
+3. **Pages & Components**:
+   - Public Pages:
+     - Homepage with Hero, Featured Carousel, Latest Essays, Latest Novels.
+     - Essays page (grid layout)
+     - Novels page (gallery layout)
+     - Archive page combining all content with sidebar
+   - Admin Pages:
+     - Dashboard landing
+     - Upload page for new content (with Markdown editor)
+     - Markdown editor with live preview for editing content
+     - User management page (approve/ban visitors)
+   - Components:
+     - EditorialCard
+     - FeaturedCarousel with fade/hover effects
+     - CrispChat
+     - Navbar, Footer
+     - Login/Register forms
+     - CommentSection component
+
+4. **Design System (consistent across all pages)**:
+   - Background: #F9F7F2
+   - Text: #2D2D2D
+   - Accent / Links: #C5A58A
+   - Typography: Playfair Display for headings, Inter for body
+   - Max-width content: 800–1200px
+   - Lots of whitespace, minimal borders, subtle shadows, no gradients
+   - Fully responsive
+
+5. **Technical Requirements**:
+   - Next.js 14 with App Router
+   - TypeScript
+   - Use 'use client' for components that need DOM (CrispChat, Carousel, Markdown editor)
+   - All imports compatible with VS Code / Windows
+   - Include proper CSS modules and globals.d.ts
+   - Backend integration using NextAuth.js or similar for authentication
+   - Database (PostgreSQL or SQLite) for content, users, likes, comments
+   - Support Markdown content for essays and novels
+   - API routes to handle:
+     - Uploading new content
+     - Editing existing content
+     - Likes, shares, comments
+     - User management for Admin
+
+6. **Extra Features**:
+   - Admin notifications for new comments or shares
+   - Analytics page showing most liked/reshared content
+   - SEO optimized metadata for all pages
+
+---
+
+**Instructions for AI**:
+
+- Generate the **full project folder structure** with **all code**, including:
+  - `app/layout.tsx`, `globals.css`, `globals.d.ts`
+  - Public pages `(public)` and Admin pages `(admin)` with functional components
+  - FeaturedCarousel, EditorialCard, CrispChat
+  - Admin Upload page with Markdown editor and file upload
+  - Authentication system for Admin and Visitors
+  - API routes for content CRUD, likes, shares, comments, and user management
+- Make sure the project is **ready to copy from Replit and open in VS Code on Windows** without path issues.
+- Use **absolute paths** where needed for images so Visual Studio can open them directly.
+- Maintain a **premium, minimalist design** consistent with The Sura Codex aesthetic.
+- Include comments in the code for clarity on how each component works and where to integrate database/API logic.
+
+Generate the project so it is **fully functional**, professional, and ready for deployment.

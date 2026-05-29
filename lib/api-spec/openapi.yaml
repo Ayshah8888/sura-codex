@@ -15,6 +15,18 @@ tags:
     description: Novel operations
   - name: stats
     description: Stats and summaries
+  - name: auth
+    description: Browser and mobile authentication endpoints
+  - name: comments
+    description: Comment operations
+  - name: likes
+    description: Like operations
+  - name: shares
+    description: Share operations
+  - name: users
+    description: User management
+  - name: notifications
+    description: Notification operations
 paths:
   /healthz:
     get:
@@ -28,6 +40,127 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/user:
+    get:
+      tags: [auth]
+      operationId: getCurrentAuthUser
+      summary: Get the currently authenticated user
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '200':
+          description: Auth status resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserEnvelope'
+
+  /login:
+    get:
+      tags: [auth]
+      operationId: beginBrowserLogin
+      summary: Start the browser OIDC login flow
+      parameters:
+        - name: returnTo
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to the OIDC authorization endpoint.
+
+  /callback:
+    get:
+      tags: [auth]
+      operationId: handleBrowserLoginCallback
+      summary: Complete the browser OIDC login flow
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: iss
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uri
+      responses:
+        '302':
+          description: Redirect to the returnTo path.
+
+  /logout:
+    get:
+      tags: [auth]
+      operationId: logoutBrowserSession
+      summary: Clear the session and begin OIDC logout
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '302':
+          description: Redirect to the OIDC provider logout URL.
+
+  /mobile-auth/token-exchange:
+    post:
+      tags: [auth]
+      operationId: exchangeMobileAuthorizationCode
+      summary: Exchange a mobile OIDC code for a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileTokenExchangeRequest'
+      responses:
+        '200':
+          description: Session created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileTokenExchangeSuccess'
+        '400':
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Token did not contain usable claims.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Token exchange failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /mobile-auth/logout:
+    post:
+      tags: [auth]
+      operationId: logoutMobileSession
+      summary: Delete a mobile session token
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+      responses:
+        '200':
+          description: Logout processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccess'
 
   /essays:
     get:
@@ -249,7 +382,298 @@ paths:
                 items:
                   $ref: "#/components/schemas/FeaturedItem"
 
+  /archive:
+    get:
+      operationId: listArchive
+      tags: [stats]
+      summary: List all content (essays + novels) combined, sorted by date
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Archive items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArchiveItem"
+
+  /comments:
+    get:
+      operationId: listComments
+      tags: [comments]
+      summary: List comments for a piece of content
+      parameters:
+        - name: essayId
+          in: query
+          schema:
+            type: integer
+        - name: novelId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+    post:
+      operationId: createComment
+      tags: [comments]
+      summary: Post a comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+
+  /comments/{id}:
+    delete:
+      operationId: deleteComment
+      tags: [comments]
+      summary: Delete a comment (admin or own)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /comments/{id}/approve:
+    patch:
+      operationId: approveComment
+      tags: [comments]
+      summary: Admin approve a pending comment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+
+  /likes/toggle:
+    post:
+      operationId: toggleLike
+      tags: [likes]
+      summary: Toggle a like on an essay or novel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LikeToggleInput"
+      responses:
+        "200":
+          description: Like state after toggle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeToggleResult"
+
+  /likes/counts:
+    get:
+      operationId: getLikeCounts
+      tags: [likes]
+      summary: Get like counts for a content item
+      parameters:
+        - name: essayId
+          in: query
+          schema:
+            type: integer
+        - name: novelId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Like counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeCounts"
+
+  /shares:
+    post:
+      operationId: recordShare
+      tags: [shares]
+      summary: Record a share event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShareInput"
+      responses:
+        "201":
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareResult"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: Admin — list all users
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+
+  /users/{id}/role:
+    patch:
+      operationId: updateUserRole
+      tags: [users]
+      summary: Admin — set a user's role
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRoleInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/{id}/ban:
+    patch:
+      operationId: banUser
+      tags: [users]
+      summary: Admin — ban or unban a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BanUserInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: Admin — list notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark a notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /analytics:
+    get:
+      operationId: getAnalytics
+      tags: [stats]
+      summary: Get analytics — most liked and shared content
+      responses:
+        "200":
+          description: Analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analytics"
+
 components:
+  parameters:
+    AuthorizationSessionHeader:
+      name: Authorization
+      in: header
+      required: false
+      description: Opaque session token — Bearer <sid>.
+      schema:
+        type: string
+    SessionCookie:
+      name: sid
+      in: cookie
+      required: false
+      description: Browser session cookie.
+      schema:
+        type: string
+
   schemas:
     HealthStatus:
       type: object
@@ -259,9 +683,79 @@ components:
       required:
         - status
 
+    AuthUser:
+      type: object
+      required: [id, email, firstName, lastName, profileImageUrl]
+      properties:
+        id:
+          type: string
+        email:
+          type: [string, 'null']
+          format: email
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        profileImageUrl:
+          type: [string, 'null']
+        role:
+          type: string
+
+    AuthUserEnvelope:
+      type: object
+      required: [user]
+      properties:
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/AuthUser'
+            - type: 'null'
+
+    MobileTokenExchangeRequest:
+      type: object
+      required: [code, code_verifier, redirect_uri, state]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        code_verifier:
+          type: string
+          minLength: 1
+        redirect_uri:
+          type: string
+          minLength: 1
+          format: uri
+        state:
+          type: string
+          minLength: 1
+        nonce:
+          type: string
+          minLength: 1
+
+    MobileTokenExchangeSuccess:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    LogoutSuccess:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          const: true
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
     Essay:
       type: object
-      required: [id, title, slug, excerpt, content, category, publishedAt, featured, readingTime]
+      required: [id, title, slug, excerpt, content, category, publishedAt, featured, readingTime, likeCount, commentCount, shareCount]
       properties:
         id:
           type: integer
@@ -275,7 +769,6 @@ components:
           type: string
         category:
           type: string
-          description: "tech | writing | journey"
         coverImage:
           type: ["string", "null"]
         publishedAt:
@@ -284,7 +777,12 @@ components:
           type: boolean
         readingTime:
           type: integer
-          description: Minutes to read
+        likeCount:
+          type: integer
+        commentCount:
+          type: integer
+        shareCount:
+          type: integer
 
     EssayInput:
       type: object
@@ -329,7 +827,7 @@ components:
 
     Novel:
       type: object
-      required: [id, title, slug, synopsis, content, publishedAt, featured, status]
+      required: [id, title, slug, synopsis, content, publishedAt, featured, status, likeCount, commentCount, shareCount]
       properties:
         id:
           type: integer
@@ -349,8 +847,13 @@ components:
           type: boolean
         status:
           type: string
-          description: "draft | serializing | complete"
         chaptersCount:
+          type: integer
+        likeCount:
+          type: integer
+        commentCount:
+          type: integer
+        shareCount:
           type: integer
 
     NovelInput:
@@ -396,13 +899,19 @@ components:
 
     SiteSummary:
       type: object
-      required: [totalEssays, totalNovels, totalFeatured, categories]
+      required: [totalEssays, totalNovels, totalFeatured, categories, totalUsers, totalComments, pendingComments]
       properties:
         totalEssays:
           type: integer
         totalNovels:
           type: integer
         totalFeatured:
+          type: integer
+        totalUsers:
+          type: integer
+        totalComments:
+          type: integer
+        pendingComments:
           type: integer
         categories:
           type: array
@@ -423,7 +932,6 @@ components:
           type: integer
         type:
           type: string
-          description: "essay | novel"
         title:
           type: string
         slug:
@@ -436,3 +944,199 @@ components:
           type: string
         category:
           type: ["string", "null"]
+
+    ArchiveItem:
+      type: object
+      required: [id, type, title, slug, excerpt, publishedAt, likeCount, commentCount]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        coverImage:
+          type: ["string", "null"]
+        publishedAt:
+          type: string
+        category:
+          type: ["string", "null"]
+        likeCount:
+          type: integer
+        commentCount:
+          type: integer
+
+    Comment:
+      type: object
+      required: [id, content, authorName, createdAt, isApproved]
+      properties:
+        id:
+          type: integer
+        essayId:
+          type: ["integer", "null"]
+        novelId:
+          type: ["integer", "null"]
+        parentId:
+          type: ["integer", "null"]
+        userId:
+          type: ["string", "null"]
+        authorName:
+          type: string
+        authorImage:
+          type: ["string", "null"]
+        content:
+          type: string
+        createdAt:
+          type: string
+        isApproved:
+          type: boolean
+        replies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+
+    CommentInput:
+      type: object
+      required: [content, authorName]
+      properties:
+        essayId:
+          type: integer
+        novelId:
+          type: integer
+        parentId:
+          type: integer
+        authorName:
+          type: string
+        content:
+          type: string
+
+    LikeToggleInput:
+      type: object
+      properties:
+        essayId:
+          type: integer
+        novelId:
+          type: integer
+
+    LikeToggleResult:
+      type: object
+      required: [liked, count]
+      properties:
+        liked:
+          type: boolean
+        count:
+          type: integer
+
+    LikeCounts:
+      type: object
+      required: [count, userLiked]
+      properties:
+        count:
+          type: integer
+        userLiked:
+          type: boolean
+
+    ShareInput:
+      type: object
+      properties:
+        essayId:
+          type: integer
+        novelId:
+          type: integer
+
+    ShareResult:
+      type: object
+      required: [shareCount]
+      properties:
+        shareCount:
+          type: integer
+
+    UserProfile:
+      type: object
+      required: [id, createdAt, role, isBanned]
+      properties:
+        id:
+          type: string
+        email:
+          type: ["string", "null"]
+        firstName:
+          type: ["string", "null"]
+        lastName:
+          type: ["string", "null"]
+        profileImageUrl:
+          type: ["string", "null"]
+        role:
+          type: string
+        isBanned:
+          type: boolean
+        createdAt:
+          type: string
+
+    UpdateUserRoleInput:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+
+    BanUserInput:
+      type: object
+      required: [banned]
+      properties:
+        banned:
+          type: boolean
+
+    Notification:
+      type: object
+      required: [id, type, message, isRead, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        message:
+          type: string
+        essayId:
+          type: ["integer", "null"]
+        novelId:
+          type: ["integer", "null"]
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+
+    Analytics:
+      type: object
+      required: [topLiked, topShared, topCommented]
+      properties:
+        topLiked:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsItem"
+        topShared:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsItem"
+        topCommented:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsItem"
+
+    AnalyticsItem:
+      type: object
+      required: [id, type, title, slug, count]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        count:
+          type: integer

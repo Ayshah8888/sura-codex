@@ -1,13 +1,15 @@
 import { Router } from "express";
-import { db, essaysTable, novelsTable } from "@workspace/db";
+import { db, essaysTable, novelsTable, usersTable, commentsTable } from "@workspace/db";
 
 const router = Router();
 
 router.get("/summary", async (_req, res) => {
   try {
-    const [essays, novels] = await Promise.all([
+    const [essays, novels, users, comments] = await Promise.all([
       db.select().from(essaysTable),
       db.select().from(novelsTable),
+      db.select().from(usersTable),
+      db.select().from(commentsTable),
     ]);
 
     const categoryCounts: Record<string, number> = {};
@@ -21,6 +23,9 @@ router.get("/summary", async (_req, res) => {
       totalEssays: essays.length,
       totalNovels: novels.length,
       totalFeatured,
+      totalUsers: users.length,
+      totalComments: comments.filter((c) => c.isApproved).length,
+      pendingComments: comments.filter((c) => !c.isApproved).length,
       categories: Object.entries(categoryCounts).map(([name, count]) => ({ name, count })),
     });
   } catch {

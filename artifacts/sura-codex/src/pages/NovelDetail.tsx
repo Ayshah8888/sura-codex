@@ -1,18 +1,49 @@
-import { useGetNovel } from "@workspace/api-client-react";
+import { useGetNovel, useGetLikeCounts, useToggleLike, useRecordShare, getGetNovelQueryKey, getGetLikeCountsQueryKey } from "@workspace/api-client-react";
 import { useParams, Link } from "wouter";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Heart, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import CommentSection from "@/components/CommentSection";
 
 export default function NovelDetail() {
   const params = useParams();
   const id = parseInt(params.id || "0", 10);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: novel, isLoading } = useGetNovel(id, {
     query: { enabled: !!id }
   });
+
+  const { data: likeCounts } = useGetLikeCounts({ novelId: id }, {
+    query: { enabled: !!id }
+  });
+
+  const toggleLike = useToggleLike();
+  const recordShare = useRecordShare();
+
+  const handleLike = () => {
+    toggleLike.mutate({ data: { novelId: id } }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetNovelQueryKey(id) });
+        queryClient.invalidateQueries({ queryKey: getGetLikeCountsQueryKey({ novelId: id }) });
+      }
+    });
+  };
+
+  const handleShare = () => {
+    recordShare.mutate({ data: { novelId: id } }, {
+      onSuccess: () => {
+        navigator.clipboard.writeText(window.location.href);
+        toast({ title: "Link copied to clipboard!" });
+      }
+    });
+  };
 
   if (isLoading) {
     return (
@@ -60,10 +91,25 @@ export default function NovelDetail() {
           {novel.title}
         </h1>
         {novel.synopsis && (
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto italic">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto italic mb-8">
             {novel.synopsis}
           </p>
         )}
+        
+        <div className="flex items-center justify-center space-x-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleLike}
+            className={`rounded-full ${likeCounts?.userLiked ? 'text-red-500 border-red-200 bg-red-50' : ''}`}
+          >
+            <Heart className={`w-4 h-4 mr-2 ${likeCounts?.userLiked ? 'fill-current' : ''}`} />
+            {likeCounts?.count || 0}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
+            <Share2 className="w-4 h-4 mr-2" /> Share
+          </Button>
+        </div>
       </header>
 
       {novel.coverImage && (
@@ -75,6 +121,8 @@ export default function NovelDetail() {
       <div className="bg-card p-8 md:p-12 border border-border/50 shadow-sm">
         <MarkdownRenderer content={novel.content} />
       </div>
+
+      <CommentSection novelId={id} />
     </article>
   );
 }

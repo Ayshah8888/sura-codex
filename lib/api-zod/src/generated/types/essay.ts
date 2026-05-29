@@ -12,12 +12,13 @@ export interface Essay {
   slug: string;
   excerpt: string;
   content: string;
-  /** tech | writing | journey */
   category: string;
   /** @nullable */
   coverImage?: string | null;
   publishedAt: string;
   featured: boolean;
-  /** Minutes to read */
   readingTime: number;
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
 }

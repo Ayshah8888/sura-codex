@@ -11,5 +11,8 @@ export interface SiteSummary {
   totalEssays: number;
   totalNovels: number;
   totalFeatured: number;
+  totalUsers: number;
+  totalComments: number;
+  pendingComments: number;
   categories: SiteSummaryCategoriesItem[];
 }

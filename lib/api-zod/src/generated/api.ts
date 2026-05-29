@@ -17,6 +17,86 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Get the currently authenticated user
+ */
+export const GetCurrentAuthUserHeader = zod.object({
+  "Authorization": zod.string().optional().describe('Opaque session token — Bearer <sid>.')
+})
+
+export const GetCurrentAuthUserResponse = zod.object({
+  "user": zod.union([zod.object({
+  "id": zod.string(),
+  "email": zod.string().email().nullable(),
+  "firstName": zod.string().nullable(),
+  "lastName": zod.string().nullable(),
+  "profileImageUrl": zod.string().nullable(),
+  "role": zod.string().optional()
+}),zod.null()])
+})
+
+
+/**
+ * @summary Start the browser OIDC login flow
+ */
+export const BeginBrowserLoginQueryParams = zod.object({
+  "returnTo": zod.coerce.string().optional()
+})
+
+
+/**
+ * @summary Complete the browser OIDC login flow
+ */
+export const HandleBrowserLoginCallbackQueryParams = zod.object({
+  "code": zod.coerce.string().optional(),
+  "state": zod.coerce.string().optional(),
+  "iss": zod.coerce.string().url().optional()
+})
+
+
+/**
+ * @summary Clear the session and begin OIDC logout
+ */
+export const LogoutBrowserSessionHeader = zod.object({
+  "Authorization": zod.string().optional().describe('Opaque session token — Bearer <sid>.')
+})
+
+
+/**
+ * @summary Exchange a mobile OIDC code for a session token
+ */
+
+
+
+
+
+
+
+export const ExchangeMobileAuthorizationCodeBody = zod.object({
+  "code": zod.string().min(1),
+  "code_verifier": zod.string().min(1),
+  "redirect_uri": zod.string().url().min(1),
+  "state": zod.string().min(1),
+  "nonce": zod.string().min(1).optional()
+})
+
+export const ExchangeMobileAuthorizationCodeResponse = zod.object({
+  "token": zod.string()
+})
+
+
+/**
+ * @summary Delete a mobile session token
+ */
+export const LogoutMobileSessionHeader = zod.object({
+  "Authorization": zod.string().optional().describe('Opaque session token — Bearer <sid>.')
+})
+
+export const LogoutMobileSessionResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
  * @summary List all essays
  */
 export const ListEssaysQueryParams = zod.object({
@@ -30,11 +110,14 @@ export const ListEssaysResponseItem = zod.object({
   "slug": zod.string(),
   "excerpt": zod.string(),
   "content": zod.string(),
-  "category": zod.string().describe('tech | writing | journey'),
+  "category": zod.string(),
   "coverImage": zod.string().nullish(),
   "publishedAt": zod.string(),
   "featured": zod.boolean(),
-  "readingTime": zod.number().describe('Minutes to read')
+  "readingTime": zod.number(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "shareCount": zod.number()
 })
 export const ListEssaysResponse = zod.array(ListEssaysResponseItem)
 
@@ -67,11 +150,14 @@ export const GetEssayResponse = zod.object({
   "slug": zod.string(),
   "excerpt": zod.string(),
   "content": zod.string(),
-  "category": zod.string().describe('tech | writing | journey'),
+  "category": zod.string(),
   "coverImage": zod.string().nullish(),
   "publishedAt": zod.string(),
   "featured": zod.boolean(),
-  "readingTime": zod.number().describe('Minutes to read')
+  "readingTime": zod.number(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "shareCount": zod.number()
 })
 
 
@@ -99,11 +185,14 @@ export const UpdateEssayResponse = zod.object({
   "slug": zod.string(),
   "excerpt": zod.string(),
   "content": zod.string(),
-  "category": zod.string().describe('tech | writing | journey'),
+  "category": zod.string(),
   "coverImage": zod.string().nullish(),
   "publishedAt": zod.string(),
   "featured": zod.boolean(),
-  "readingTime": zod.number().describe('Minutes to read')
+  "readingTime": zod.number(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "shareCount": zod.number()
 })
 
 
@@ -131,8 +220,11 @@ export const ListNovelsResponseItem = zod.object({
   "coverImage": zod.string().nullish(),
   "publishedAt": zod.string(),
   "featured": zod.boolean(),
-  "status": zod.string().describe('draft | serializing | complete'),
-  "chaptersCount": zod.number().optional()
+  "status": zod.string(),
+  "chaptersCount": zod.number().optional(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "shareCount": zod.number()
 })
 export const ListNovelsResponse = zod.array(ListNovelsResponseItem)
 
@@ -168,8 +260,11 @@ export const GetNovelResponse = zod.object({
   "coverImage": zod.string().nullish(),
   "publishedAt": zod.string(),
   "featured": zod.boolean(),
-  "status": zod.string().describe('draft | serializing | complete'),
-  "chaptersCount": zod.number().optional()
+  "status": zod.string(),
+  "chaptersCount": zod.number().optional(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "shareCount": zod.number()
 })
 
 
@@ -200,8 +295,11 @@ export const UpdateNovelResponse = zod.object({
   "coverImage": zod.string().nullish(),
   "publishedAt": zod.string(),
   "featured": zod.boolean(),
-  "status": zod.string().describe('draft | serializing | complete'),
-  "chaptersCount": zod.number().optional()
+  "status": zod.string(),
+  "chaptersCount": zod.number().optional(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "shareCount": zod.number()
 })
 
 
@@ -220,6 +318,9 @@ export const GetSummaryResponse = zod.object({
   "totalEssays": zod.number(),
   "totalNovels": zod.number(),
   "totalFeatured": zod.number(),
+  "totalUsers": zod.number(),
+  "totalComments": zod.number(),
+  "pendingComments": zod.number(),
   "categories": zod.array(zod.object({
   "name": zod.string(),
   "count": zod.number()
@@ -232,7 +333,7 @@ export const GetSummaryResponse = zod.object({
  */
 export const ListFeaturedResponseItem = zod.object({
   "id": zod.number(),
-  "type": zod.string().describe('essay | novel'),
+  "type": zod.string(),
   "title": zod.string(),
   "slug": zod.string(),
   "excerpt": zod.string(),
@@ -241,5 +342,255 @@ export const ListFeaturedResponseItem = zod.object({
   "category": zod.string().nullish()
 })
 export const ListFeaturedResponse = zod.array(ListFeaturedResponseItem)
+
+
+/**
+ * @summary List all content (essays + novels) combined, sorted by date
+ */
+export const ListArchiveQueryParams = zod.object({
+  "type": zod.coerce.string().optional(),
+  "category": zod.coerce.string().optional(),
+  "q": zod.coerce.string().optional()
+})
+
+export const ListArchiveResponseItem = zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "excerpt": zod.string(),
+  "coverImage": zod.string().nullish(),
+  "publishedAt": zod.string(),
+  "category": zod.string().nullish(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number()
+})
+export const ListArchiveResponse = zod.array(ListArchiveResponseItem)
+
+
+/**
+ * @summary List comments for a piece of content
+ */
+export const ListCommentsQueryParams = zod.object({
+  "essayId": zod.coerce.number().optional(),
+  "novelId": zod.coerce.number().optional()
+})
+
+export const ListCommentsResponseItem = zod.object({
+  "id": zod.number(),
+  "essayId": zod.number().nullish(),
+  "novelId": zod.number().nullish(),
+  "parentId": zod.number().nullish(),
+  "userId": zod.string().nullish(),
+  "authorName": zod.string(),
+  "authorImage": zod.string().nullish(),
+  "content": zod.string(),
+  "createdAt": zod.string(),
+  "isApproved": zod.boolean(),
+  "replies": zod.array(zod.unknown()).optional()
+})
+export const ListCommentsResponse = zod.array(ListCommentsResponseItem)
+
+
+/**
+ * @summary Post a comment
+ */
+export const CreateCommentBody = zod.object({
+  "essayId": zod.number().optional(),
+  "novelId": zod.number().optional(),
+  "parentId": zod.number().optional(),
+  "authorName": zod.string(),
+  "content": zod.string()
+})
+
+
+/**
+ * @summary Delete a comment (admin or own)
+ */
+export const DeleteCommentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Admin approve a pending comment
+ */
+export const ApproveCommentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ApproveCommentResponse = zod.object({
+  "id": zod.number(),
+  "essayId": zod.number().nullish(),
+  "novelId": zod.number().nullish(),
+  "parentId": zod.number().nullish(),
+  "userId": zod.string().nullish(),
+  "authorName": zod.string(),
+  "authorImage": zod.string().nullish(),
+  "content": zod.string(),
+  "createdAt": zod.string(),
+  "isApproved": zod.boolean(),
+  "replies": zod.array(zod.unknown()).optional()
+})
+
+
+/**
+ * @summary Toggle a like on an essay or novel
+ */
+export const ToggleLikeBody = zod.object({
+  "essayId": zod.number().optional(),
+  "novelId": zod.number().optional()
+})
+
+export const ToggleLikeResponse = zod.object({
+  "liked": zod.boolean(),
+  "count": zod.number()
+})
+
+
+/**
+ * @summary Get like counts for a content item
+ */
+export const GetLikeCountsQueryParams = zod.object({
+  "essayId": zod.coerce.number().optional(),
+  "novelId": zod.coerce.number().optional()
+})
+
+export const GetLikeCountsResponse = zod.object({
+  "count": zod.number(),
+  "userLiked": zod.boolean()
+})
+
+
+/**
+ * @summary Record a share event
+ */
+export const RecordShareBody = zod.object({
+  "essayId": zod.number().optional(),
+  "novelId": zod.number().optional()
+})
+
+
+/**
+ * @summary Admin — list all users
+ */
+export const ListUsersResponseItem = zod.object({
+  "id": zod.string(),
+  "email": zod.string().nullish(),
+  "firstName": zod.string().nullish(),
+  "lastName": zod.string().nullish(),
+  "profileImageUrl": zod.string().nullish(),
+  "role": zod.string(),
+  "isBanned": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const ListUsersResponse = zod.array(ListUsersResponseItem)
+
+
+/**
+ * @summary Admin — set a user's role
+ */
+export const UpdateUserRoleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateUserRoleBody = zod.object({
+  "role": zod.string()
+})
+
+export const UpdateUserRoleResponse = zod.object({
+  "id": zod.string(),
+  "email": zod.string().nullish(),
+  "firstName": zod.string().nullish(),
+  "lastName": zod.string().nullish(),
+  "profileImageUrl": zod.string().nullish(),
+  "role": zod.string(),
+  "isBanned": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Admin — ban or unban a user
+ */
+export const BanUserParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const BanUserBody = zod.object({
+  "banned": zod.boolean()
+})
+
+export const BanUserResponse = zod.object({
+  "id": zod.string(),
+  "email": zod.string().nullish(),
+  "firstName": zod.string().nullish(),
+  "lastName": zod.string().nullish(),
+  "profileImageUrl": zod.string().nullish(),
+  "role": zod.string(),
+  "isBanned": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Admin — list notifications
+ */
+export const ListNotificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "message": zod.string(),
+  "essayId": zod.number().nullish(),
+  "novelId": zod.number().nullish(),
+  "isRead": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem)
+
+
+/**
+ * @summary Mark a notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const MarkNotificationReadResponse = zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "message": zod.string(),
+  "essayId": zod.number().nullish(),
+  "novelId": zod.number().nullish(),
+  "isRead": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get analytics — most liked and shared content
+ */
+export const GetAnalyticsResponse = zod.object({
+  "topLiked": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "count": zod.number()
+})),
+  "topShared": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "count": zod.number()
+})),
+  "topCommented": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "count": zod.number()
+}))
+})
 
 

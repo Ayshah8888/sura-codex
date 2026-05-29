@@ -8,7 +8,6 @@
 
 export interface FeaturedItem {
   id: number;
-  /** essay | novel */
   type: string;
   title: string;
   slug: string;

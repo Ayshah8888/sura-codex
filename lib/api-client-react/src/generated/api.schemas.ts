@@ -9,20 +9,64 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface AuthUser {
+  id: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  firstName: string | null;
+  /** @nullable */
+  lastName: string | null;
+  /** @nullable */
+  profileImageUrl: string | null;
+  role?: string;
+}
+
+export interface AuthUserEnvelope {
+  user: AuthUser | null;
+}
+
+export interface MobileTokenExchangeRequest {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  code_verifier: string;
+  /** @minLength 1 */
+  redirect_uri: string;
+  /** @minLength 1 */
+  state: string;
+  /** @minLength 1 */
+  nonce?: string;
+}
+
+export interface MobileTokenExchangeSuccess {
+  token: string;
+}
+
+export const LogoutSuccessValue = {
+  success: true,
+} as const;
+export type LogoutSuccess = typeof LogoutSuccessValue;
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
 export interface Essay {
   id: number;
   title: string;
   slug: string;
   excerpt: string;
   content: string;
-  /** tech | writing | journey */
   category: string;
   /** @nullable */
   coverImage?: string | null;
   publishedAt: string;
   featured: boolean;
-  /** Minutes to read */
   readingTime: number;
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
 }
 
 export interface EssayInput {
@@ -57,9 +101,11 @@ export interface Novel {
   coverImage?: string | null;
   publishedAt: string;
   featured: boolean;
-  /** draft | serializing | complete */
   status: string;
   chaptersCount?: number;
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
 }
 
 export interface NovelInput {
@@ -93,12 +139,14 @@ export interface SiteSummary {
   totalEssays: number;
   totalNovels: number;
   totalFeatured: number;
+  totalUsers: number;
+  totalComments: number;
+  pendingComments: number;
   categories: SiteSummaryCategoriesItem[];
 }
 
 export interface FeaturedItem {
   id: number;
-  /** essay | novel */
   type: string;
   title: string;
   slug: string;
@@ -110,6 +158,136 @@ export interface FeaturedItem {
   category?: string | null;
 }
 
+export interface ArchiveItem {
+  id: number;
+  type: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  /** @nullable */
+  coverImage?: string | null;
+  publishedAt: string;
+  /** @nullable */
+  category?: string | null;
+  likeCount: number;
+  commentCount: number;
+}
+
+export interface Comment {
+  id: number;
+  /** @nullable */
+  essayId?: number | null;
+  /** @nullable */
+  novelId?: number | null;
+  /** @nullable */
+  parentId?: number | null;
+  /** @nullable */
+  userId?: string | null;
+  authorName: string;
+  /** @nullable */
+  authorImage?: string | null;
+  content: string;
+  createdAt: string;
+  isApproved: boolean;
+  replies?: Comment[];
+}
+
+export interface CommentInput {
+  essayId?: number;
+  novelId?: number;
+  parentId?: number;
+  authorName: string;
+  content: string;
+}
+
+export interface LikeToggleInput {
+  essayId?: number;
+  novelId?: number;
+}
+
+export interface LikeToggleResult {
+  liked: boolean;
+  count: number;
+}
+
+export interface LikeCounts {
+  count: number;
+  userLiked: boolean;
+}
+
+export interface ShareInput {
+  essayId?: number;
+  novelId?: number;
+}
+
+export interface ShareResult {
+  shareCount: number;
+}
+
+export interface UserProfile {
+  id: string;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  firstName?: string | null;
+  /** @nullable */
+  lastName?: string | null;
+  /** @nullable */
+  profileImageUrl?: string | null;
+  role: string;
+  isBanned: boolean;
+  createdAt: string;
+}
+
+export interface UpdateUserRoleInput {
+  role: string;
+}
+
+export interface BanUserInput {
+  banned: boolean;
+}
+
+export interface Notification {
+  id: number;
+  type: string;
+  message: string;
+  /** @nullable */
+  essayId?: number | null;
+  /** @nullable */
+  novelId?: number | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface AnalyticsItem {
+  id: number;
+  type: string;
+  title: string;
+  slug: string;
+  count: number;
+}
+
+export interface Analytics {
+  topLiked: AnalyticsItem[];
+  topShared: AnalyticsItem[];
+  topCommented: AnalyticsItem[];
+}
+
+/**
+ * Opaque session token — Bearer <sid>.
+ */
+export type AuthorizationSessionHeaderParameter = string;
+
+export type BeginBrowserLoginParams = {
+returnTo?: string;
+};
+
+export type HandleBrowserLoginCallbackParams = {
+code?: string;
+state?: string;
+iss?: string;
+};
+
 export type ListEssaysParams = {
 category?: string;
 featured?: boolean;
@@ -117,5 +295,21 @@ featured?: boolean;
 
 export type ListNovelsParams = {
 featured?: boolean;
+};
+
+export type ListArchiveParams = {
+type?: string;
+category?: string;
+q?: string;
+};
+
+export type ListCommentsParams = {
+essayId?: number;
+novelId?: number;
+};
+
+export type GetLikeCountsParams = {
+essayId?: number;
+novelId?: number;
 };
 

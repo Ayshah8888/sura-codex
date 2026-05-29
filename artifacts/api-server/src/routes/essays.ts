@@ -1,20 +1,33 @@
 import { Router } from "express";
-import { db, essaysTable, insertEssaySchema } from "@workspace/db";
+import { db, essaysTable, insertEssaySchema, likesTable, commentsTable, sharesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const router = Router();
 
+async function withCounts(essay: typeof essaysTable.$inferSelect) {
+  const [likes, comments, shares] = await Promise.all([
+    db.select().from(likesTable).where(eq(likesTable.essayId, essay.id)),
+    db.select().from(commentsTable).where(eq(commentsTable.essayId, essay.id)),
+    db.select().from(sharesTable).where(eq(sharesTable.essayId, essay.id)),
+  ]);
+  return {
+    ...toApi(essay),
+    likeCount: likes.length,
+    commentCount: comments.filter((c) => c.isApproved).length,
+    shareCount: shares.length,
+  };
+}
+
 router.get("/", async (req, res) => {
   try {
     const { category, featured } = req.query;
-    let query = db.select().from(essaysTable).$dynamic();
-    const rows = await db.select().from(essaysTable);
-    let results = rows;
+    let results = await db.select().from(essaysTable);
     if (category) results = results.filter((e) => e.category === category);
     if (featured !== undefined) results = results.filter((e) => e.featured === (featured === "true"));
     results.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-    res.json(results.map(toApi));
-  } catch (err) {
+    const withC = await Promise.all(results.map(withCounts));
+    res.json(withC);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -34,7 +47,7 @@ router.post("/", async (req, res) => {
       readingTime: body.readingTime ?? estimateReadingTime(body.content),
     });
     const [essay] = await db.insert(essaysTable).values(data).returning();
-    res.status(201).json(toApi(essay));
+    res.status(201).json(await withCounts(essay));
   } catch (err: any) {
     if (err?.name === "ZodError") return res.status(400).json({ error: err.message });
     res.status(500).json({ error: "Internal server error" });
@@ -46,7 +59,7 @@ router.get("/:id", async (req, res) => {
     const id = Number(req.params.id);
     const [essay] = await db.select().from(essaysTable).where(eq(essaysTable.id, id));
     if (!essay) return res.status(404).json({ error: "Not found" });
-    res.json(toApi(essay));
+    res.json(await withCounts(essay));
   } catch {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -70,7 +83,7 @@ router.patch("/:id", async (req, res) => {
     if (body.readingTime !== undefined) update.readingTime = body.readingTime;
     const [essay] = await db.update(essaysTable).set(update).where(eq(essaysTable.id, id)).returning();
     if (!essay) return res.status(404).json({ error: "Not found" });
-    res.json(toApi(essay));
+    res.json(await withCounts(essay));
   } catch {
     res.status(500).json({ error: "Internal server error" });
   }

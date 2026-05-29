@@ -16,7 +16,9 @@ export interface Novel {
   coverImage?: string | null;
   publishedAt: string;
   featured: boolean;
-  /** draft | serializing | complete */
   status: string;
   chaptersCount?: number;
+  likeCount: number;
+  commentCount: number;
+  shareCount: number;
 }
