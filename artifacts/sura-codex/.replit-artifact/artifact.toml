@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "The Sura Codex"
+version = "1.0.0"
+id = "artifacts/sura-codex"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25220
+
+[services.development]
+run = "pnpm --filter @workspace/sura-codex run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sura-codex", "run", "build" ]
+publicDir = "artifacts/sura-codex/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25220"
+BASE_PATH = "/"

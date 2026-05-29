@@ -1,0 +1,55 @@
+You are an expert full-stack developer and UX designer. I want you to generate a **Next.js + TypeScript project** for a digital literary platform called "The Sura Codex" that combines technology and literature. The project must follow these rules:
+
+1. **Project structure**:
+   - Use **Next.js 14 (App Router)** with TypeScript.
+   - All pages must be under `app/` with folders `(public)` and `(admin)` for public and admin content.
+   - Components go in `components/` with logical subfolders (e.g., `layout`, `editorial`).
+   - Assets like images go under `public/images/`.
+   - Global CSS under `globals.css`.
+   - TypeScript declarations for CSS in `globals.d.ts`.
+
+2. **Coding & compatibility rules**:
+   - Code must be compatible with **Visual Studio** on Windows.
+   - Use `'use client'` for any component needing DOM access (like CrispChat, Carousel, Markdown editor).
+   - Include `globals.d.ts` for CSS modules:
+     ```ts
+     declare module '*.css';
+     ```
+   - All imports must be relative or using `@/` aliases correctly to avoid path issues when moving from Replit to VS Code.
+   - Use Next.js 14 conventions for `layout.tsx` and `page.tsx`.
+
+3. **Design system (consistent across all pages)**:
+   - Background: `#F9F7F2` (Cream)
+   - Text: `#2D2D2D` (Charcoal)
+   - Accent / Links: `#C5A58A` (Taupe)
+   - Typography: `Playfair Display` for headings, `Inter` for body text.
+   - Max-width for content: 800–1200px.
+   - Generous whitespace, line-height 1.7–1.9, minimal borders, subtle shadows, no gradients.
+
+4. **Pages and components to generate**:
+   - `app/layout.tsx` with Navbar and CrispChat.
+   - `app/(public)/page.tsx` with Hero, FeaturedCarousel, Latest Essays, Latest Novels.
+   - `app/(public)/essays/page.tsx` and `app/(public)/novels/page.tsx` with grid cards.
+   - `app/(admin)/dashboard/page.tsx` and `app/(admin)/editor/page.tsx` with Markdown editor and live preview.
+   - Components: `EditorialCard.tsx`, `FeaturedCarousel.tsx`, `CrispChat.tsx`.
+   - Ensure all images, links, and routing work out-of-the-box.
+
+5. **Content inspiration**:
+   - "The Sura Codex" is a digital sanctuary merging coding and literature.
+   - Sections:
+     1. Tech: programming articles, system architecture, digital projects in an artistic writing style.
+     2. Writing: essays, creative texts, novels published with literary depth.
+     3. Product Journey: site development is part of content.
+   - Tone: intelligent, literary, technical, calm.
+   - Target audience: programmer-writers, creative coders, quality-focused readers.
+   - The same aesthetic must be maintained across all pages.
+
+6. **Extra requirements**:
+   - Fully responsive design.
+   - Admin editor must support Markdown live preview with optional toolbar buttons.
+   - Featured Carousel must support multiple items and hover/fade effects.
+   - Provide **absolute paths for images** in the generated project so opening in VS Code works immediately.
+
+---
+
+Generate the **full Next.js project folder structure** with all the code, ready to copy from Replit and open in Visual Studio without path issues.

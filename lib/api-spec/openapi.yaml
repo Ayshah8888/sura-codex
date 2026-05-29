@@ -1,22 +1,26 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: The Sura Codex API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: essays
+    description: Essay operations
+  - name: novels
+    description: Novel operations
+  - name: stats
+    description: Stats and summaries
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +28,227 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /essays:
+    get:
+      operationId: listEssays
+      tags: [essays]
+      summary: List all essays
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of essays
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Essay"
+    post:
+      operationId: createEssay
+      tags: [essays]
+      summary: Create an essay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EssayInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Essay"
+
+  /essays/{id}:
+    get:
+      operationId: getEssay
+      tags: [essays]
+      summary: Get an essay by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Essay
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Essay"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateEssay
+      tags: [essays]
+      summary: Update an essay
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EssayUpdate"
+      responses:
+        "200":
+          description: Updated essay
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Essay"
+    delete:
+      operationId: deleteEssay
+      tags: [essays]
+      summary: Delete an essay
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /novels:
+    get:
+      operationId: listNovels
+      tags: [novels]
+      summary: List all novels
+      parameters:
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of novels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Novel"
+    post:
+      operationId: createNovel
+      tags: [novels]
+      summary: Create a novel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NovelInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Novel"
+
+  /novels/{id}:
+    get:
+      operationId: getNovel
+      tags: [novels]
+      summary: Get a novel by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Novel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Novel"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateNovel
+      tags: [novels]
+      summary: Update a novel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NovelUpdate"
+      responses:
+        "200":
+          description: Updated novel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Novel"
+    delete:
+      operationId: deleteNovel
+      tags: [novels]
+      summary: Delete a novel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /stats/summary:
+    get:
+      operationId: getSummary
+      tags: [stats]
+      summary: Get site summary stats
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSummary"
+
+  /featured:
+    get:
+      operationId: listFeatured
+      tags: [stats]
+      summary: Get featured content (essays + novels combined)
+      responses:
+        "200":
+          description: Featured items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeaturedItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +259,180 @@ components:
       required:
         - status
 
+    Essay:
+      type: object
+      required: [id, title, slug, excerpt, content, category, publishedAt, featured, readingTime]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+          description: "tech | writing | journey"
+        coverImage:
+          type: ["string", "null"]
+        publishedAt:
+          type: string
+        featured:
+          type: boolean
+        readingTime:
+          type: integer
+          description: Minutes to read
+
+    EssayInput:
+      type: object
+      required: [title, excerpt, content, category]
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        coverImage:
+          type: string
+        featured:
+          type: boolean
+        readingTime:
+          type: integer
+
+    EssayUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        coverImage:
+          type: string
+        featured:
+          type: boolean
+        readingTime:
+          type: integer
+
+    Novel:
+      type: object
+      required: [id, title, slug, synopsis, content, publishedAt, featured, status]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        synopsis:
+          type: string
+        content:
+          type: string
+        coverImage:
+          type: ["string", "null"]
+        publishedAt:
+          type: string
+        featured:
+          type: boolean
+        status:
+          type: string
+          description: "draft | serializing | complete"
+        chaptersCount:
+          type: integer
+
+    NovelInput:
+      type: object
+      required: [title, synopsis, content, status]
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        synopsis:
+          type: string
+        content:
+          type: string
+        coverImage:
+          type: string
+        featured:
+          type: boolean
+        status:
+          type: string
+        chaptersCount:
+          type: integer
+
+    NovelUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        synopsis:
+          type: string
+        content:
+          type: string
+        coverImage:
+          type: string
+        featured:
+          type: boolean
+        status:
+          type: string
+        chaptersCount:
+          type: integer
+
+    SiteSummary:
+      type: object
+      required: [totalEssays, totalNovels, totalFeatured, categories]
+      properties:
+        totalEssays:
+          type: integer
+        totalNovels:
+          type: integer
+        totalFeatured:
+          type: integer
+        categories:
+          type: array
+          items:
+            type: object
+            required: [name, count]
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+
+    FeaturedItem:
+      type: object
+      required: [id, type, title, slug, excerpt, publishedAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          description: "essay | novel"
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        coverImage:
+          type: ["string", "null"]
+        publishedAt:
+          type: string
+        category:
+          type: ["string", "null"]
