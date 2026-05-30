@@ -1,0 +1,53 @@
+You are a Senior Full-Stack Developer. Generate a production-ready Next.js + TypeScript project called “The Sura Codex”. The project must be fully functional, compatible with Windows/Visual Studio, and ready for Google AdSense.
+
+Core Requirements:
+	1.	Authentication & Roles
+	•	Login/Register for Admin & Visitors
+	•	Admin: create/edit/delete content
+	•	Visitors: read, like, share, comment
+	•	Role-based access (NextAuth.js)
+	2.	Content Management
+	•	Admin Upload Page for Articles/Novels
+	•	Title, Excerpt, Markdown Content
+	•	Cover image, chapter images, video upload
+	•	Live Markdown preview
+	•	Articles & Novels: like, share/reshare, comment section (threaded)
+	•	Admin moderation of comments
+	3.	Pages & Components
+	•	Public: Home (Hero, FeaturedCarousel, Latest Essays, Latest Novels), Essays, Novels, Archive, About, Privacy Policy, Contact
+	•	Admin: Dashboard, Upload/Editor, User Management
+	•	Components: EditorialCard, FeaturedCarousel, CrispChat, Navbar, Footer, Login/Register Forms, CommentSection
+	•	Include site logo in Navbar and Footer
+	4.	Design System
+	•	Background: #F9F7F2, Text: #2D2D2D, Accent: #C5A58A
+	•	Headings: Playfair Display, Body: Inter
+	•	Max-width 800px, centered, generous whitespace, minimal borders/shadows
+	•	Fully responsive
+	5.	Technical Setup
+	•	Next.js 14 with App Router, TypeScript
+	•	'use client' for DOM components
+	•	Globals.css & globals.d.ts
+	•	Database (PostgreSQL/SQLite) for users, content, likes, comments, media uploads
+	•	API routes for CRUD, likes, shares, comments, user management
+	•	SEO optimized
+	6.	Production & Monetization
+	•	Google AdSense-ready: header, sidebar, between content
+	•	Custom domain instructions
+	•	Page speed & accessibility optimized
+	7.	Extra Features
+	•	FeaturedCarousel (fade/hover effects)
+	•	Admin notifications (comments/shares)
+	•	Analytics: most liked/shared content
+	•	Error handling, 404 pages, loading states
+	•	You may add other enhancements if compatible with Visual Studio
+	8.	Verification
+	•	Ensure all links, navigation, pages, and API routes work before delivering
+	•	Fully functional, ready-to-publish blog
+
+Deliverables for AI:
+	•	Full folder structure: pages, components, API routes, database setup
+	•	About, Privacy, Contact pages fully styled
+	•	Footer with links & logo
+	•	Admin Upload page supporting images/videos
+	•	Comments in code explaining logic
+	•	Ready to open and run in Visual Studio without path/import errors

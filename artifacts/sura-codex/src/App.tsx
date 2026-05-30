@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,18 +18,17 @@ import AdminEditor from "@/pages/AdminEditor";
 import Archive from "@/pages/Archive";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminUsers from "@/pages/AdminUsers";
+import About from "@/pages/About";
+import Privacy from "@/pages/Privacy";
+import Contact from "@/pages/Contact";
 
 const queryClient = new QueryClient();
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
 
   if (isLoading) return null;
-  if (!user || user.role !== "admin") {
-    setLocation("/");
-    return null;
-  }
+  if (!user || user.role !== "admin") return <Redirect to="/" />;
   return <>{children}</>;
 }
 
@@ -45,6 +44,9 @@ function Router() {
           <Route path="/novels" component={Novels} />
           <Route path="/novels/:id" component={NovelDetail} />
           <Route path="/archive" component={Archive} />
+          <Route path="/about" component={About} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/contact" component={Contact} />
           
           <Route path="/admin">
             <AdminGuard><AdminDashboard /></AdminGuard>

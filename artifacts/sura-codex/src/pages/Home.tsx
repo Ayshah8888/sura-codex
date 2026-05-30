@@ -1,5 +1,6 @@
 import { useListFeatured, useListEssays, useListNovels } from "@workspace/api-client-react";
 import EditorialCard from "@/components/EditorialCard";
+import AdSlot from "@/components/AdSlot";
 import { Link } from "wouter";
 import useEmblaCarousel from "embla-carousel-react";
 import { useEffect } from "react";
@@ -32,6 +33,8 @@ export default function Home() {
           The Sura Codex is a digital literary platform for programmer-writers who code with literary depth and write with technical precision.
         </p>
       </section>
+
+      <AdSlot slot="header" />
 
       {/* Featured Carousel */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

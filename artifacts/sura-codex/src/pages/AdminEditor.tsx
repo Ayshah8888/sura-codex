@@ -14,8 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Upload, X } from "lucide-react";
 import { Link } from "wouter";
+import { useUpload } from "@workspace/object-storage-web";
 
 export default function AdminEditor() {
   const [, setLocation] = useLocation();
@@ -31,6 +32,16 @@ export default function AdminEditor() {
   const [status, setStatus] = useState("draft");
   const [coverImage, setCoverImage] = useState("");
   const [featured, setFeatured] = useState(false);
+
+  const { toast } = useToast();
+  const { uploadFile, isUploading } = useUpload({
+    basePath: "/api/storage",
+    onSuccess: (res) => {
+      setCoverImage(`/api/storage${res.objectPath}`);
+      toast({ title: "Cover image uploaded" });
+    },
+    onError: (err) => toast({ title: "Upload failed", description: err.message, variant: "destructive" }),
+  });
   
   const isEditing = !!idParam;
   const id = isEditing ? parseInt(idParam, 10) : 0;
@@ -59,7 +70,6 @@ export default function AdminEditor() {
   }, [essayData, novelData, isEditing, type]);
 
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const createEssay = useCreateEssay();
   const updateEssay = useUpdateEssay();
@@ -209,8 +219,45 @@ export default function AdminEditor() {
           </div>
 
           <div className="space-y-2">
-            <Label>Cover Image URL (optional)</Label>
-            <Input value={coverImage} onChange={e => setCoverImage(e.target.value)} placeholder="https://..." />
+            <Label>Cover Image</Label>
+            {coverImage ? (
+              <div className="relative rounded overflow-hidden border border-border">
+                <img
+                  src={coverImage}
+                  alt="Cover preview"
+                  className="w-full h-32 object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setCoverImage("")}
+                  className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 text-white hover:bg-black/80"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ) : null}
+            <label className="w-full flex items-center justify-center gap-2 rounded border border-dashed border-border bg-muted/40 hover:bg-muted px-3 py-2 text-sm text-muted-foreground transition-colors cursor-pointer">
+              <Upload className="w-4 h-4" />
+              {isUploading ? "Uploading…" : coverImage ? "Replace image" : "Upload cover image"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={isUploading}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) await uploadFile(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            <Input
+              value={coverImage}
+              onChange={e => setCoverImage(e.target.value)}
+              placeholder="Or paste an image URL…"
+              className="text-xs"
+            />
           </div>
         </div>
 

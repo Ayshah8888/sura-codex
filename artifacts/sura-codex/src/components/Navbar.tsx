@@ -24,6 +24,12 @@ export default function Navbar() {
           <Link href="/archive" className={cn("hover:text-primary transition-colors", location.startsWith("/archive") ? "text-primary font-medium" : "text-muted-foreground")}>
             Archive
           </Link>
+          <Link href="/about" className={cn("hover:text-primary transition-colors", location.startsWith("/about") ? "text-primary font-medium" : "text-muted-foreground")}>
+            About
+          </Link>
+          <Link href="/contact" className={cn("hover:text-primary transition-colors", location.startsWith("/contact") ? "text-primary font-medium" : "text-muted-foreground")}>
+            Contact
+          </Link>
           {user?.role === 'admin' && (
             <Link href="/admin" className={cn("hover:text-primary transition-colors", location.startsWith("/admin") ? "text-primary font-medium" : "text-muted-foreground")}>
               Admin

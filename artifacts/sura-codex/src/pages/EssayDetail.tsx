@@ -1,6 +1,7 @@
 import { useGetEssay, useGetLikeCounts, useToggleLike, useRecordShare, getGetEssayQueryKey, getGetLikeCountsQueryKey } from "@workspace/api-client-react";
 import { useParams, Link } from "wouter";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import AdSlot from "@/components/AdSlot";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ArrowLeft, Heart, Share2 } from "lucide-react";
@@ -111,6 +112,8 @@ export default function EssayDetail() {
           </Button>
         </div>
       </header>
+
+      <AdSlot slot="inline" />
 
       {essay.coverImage && (
         <figure className="mb-12">

@@ -43,4 +43,6 @@ export * from './shareResult';
 export * from './siteSummary';
 export * from './siteSummaryCategoriesItem';
 export * from './updateUserRoleInput';
+export * from './uploadUrlRequest';
+export * from './uploadUrlResponse';
 export * from './userProfile';
