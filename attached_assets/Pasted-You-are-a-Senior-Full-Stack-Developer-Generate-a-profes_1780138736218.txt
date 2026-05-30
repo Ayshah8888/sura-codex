@@ -1,0 +1,91 @@
+You are a Senior Full-Stack Developer. Generate a **professional, production-ready Next.js + TypeScript project** called "The Sura Codex" with full blog functionality, ready for Google AdSense and immediate publishing.
+
+**Requirements:**
+
+1. **Authentication & Roles**:
+   - Login/register system for Admin and Visitors.
+   - Admin can create/edit/delete content.
+   - Visitors can read, like, share, comment.
+   - Role-based access with NextAuth.js or similar.
+
+2. **Content Management**:
+   - Admin Upload page for Articles or Novels:
+     - Title, Excerpt, Markdown Content
+     - Cover Image for the article/novel
+     - Upload multiple images per chapter (novels)
+     - Upload video files if needed
+     - Live Markdown preview
+   - Articles and Novels:
+     - Like button
+     - Share/Reshare button
+     - Comment section with threaded replies
+   - Admin moderation for comments
+
+3. **Pages & Components**:
+   - Public:
+     - Homepage with Hero, Featured Carousel, Latest Essays, Latest Novels
+     - Essays page (grid layout)
+     - Novels page (gallery layout)
+     - Archive page with sidebar
+     - Static Pages: About, Privacy Policy, Contact
+   - Admin:
+     - Dashboard landing
+     - Upload/Editor page with Markdown editor
+     - User management page
+   - Components:
+     - EditorialCard, FeaturedCarousel, CrispChat, Navbar, Footer
+     - Login/Register forms
+     - CommentSection
+   - Include **site logo** in Navbar and Footer
+   - All components responsive and production-ready
+
+4. **Footer Update**:
+   - Minimalist, clean
+   - Links: About, Privacy Policy, Contact
+   - Visible on all pages
+
+5. **Design System**:
+   - Background: #F9F7F2
+   - Text: #2D2D2D
+   - Accent / Links: #C5A58A
+   - Headings: Playfair Display
+   - Body: Inter
+   - Max-width 800px, centered, generous whitespace
+   - Minimal borders, subtle shadows, no gradients
+   - Fully responsive
+
+6. **Technical Requirements**:
+   - Next.js 14 with App Router
+   - TypeScript
+   - 'use client' for DOM-dependent components
+   - Globals.css and globals.d.ts included
+   - Database (PostgreSQL or SQLite) for content, users, likes, comments, media uploads
+   - API routes for CRUD content, likes, shares, comments, and user management
+   - SEO optimized metadata for all pages
+   - Fully ready for deployment to Vercel or similar
+   - **Ensure the project works on Windows/Visual Studio without path or import issues**
+
+7. **Production & Monetization**:
+   - Ready for Google AdSense (header, sidebar, between content)
+   - Instructions for connecting a custom domain
+   - Page speed and accessibility optimized for SEO and monetization
+
+8. **Extra Features & Improvements**:
+   - FeaturedCarousel with fade/hover effects
+   - Admin notifications for new comments/shares
+   - Analytics for most liked/shared content
+   - Error handling, 404 pages, loading states
+   - **You may add any other improvements you consider enhancing the blog’s professionalism, functionality, or user experience, as long as Visual Studio compatibility is maintained**
+
+9. **Verification Requirement**:
+   - Before delivering the final project, **verify that all links, navigation, pages, and API routes work correctly**, ensuring a fully functional blog ready to publish and integrate with Google AdSense immediately.
+
+**Instructions for AI**:
+
+- Generate the **full project folder structure** with all files, components, pages, API routes, and database setup.
+- Include **About, Privacy Policy, Contact pages** fully styled.
+- Include Footer with links and site logo.
+- Implement **upload options for cover images, chapter images, and videos**.
+- Ensure all paths and imports are compatible with Windows/Visual Studio.
+- Add comments in the code explaining components, pages, and API logic.
+- Deliver a **complete, professional, ready-to-publish blog** that works immediately when opened in Visual Studio.
